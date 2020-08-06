@@ -1,6 +1,6 @@
 output "ui" {
   sensitive = false
-  value     = "http://${google_compute_instance.yugabyte_node.0.network_interface.0.access_config.0.nat_ip}:7000"
+  value     = "http://${vultr_server.yugabyte_node.0.main_ip}:7000"
 }
 output "ssh_user" {
   sensitive = false
@@ -12,21 +12,21 @@ output "ssh_key" {
 }
 
 output "JDBC" {
-  sensitive =false
-  value     = "postgresql://yugabyte@${google_compute_instance.yugabyte_node.0.network_interface.0.access_config.0.nat_ip}:5433"
+  sensitive = false
+  value     = "postgresql://yugabyte@${vultr_server.yugabyte_node.0.main_ip}:5433"
 }
 
-output "YSQL"{
+output "YSQL" {
   sensitive = false
-  value     = "ysqlsh -U yugabyte -h ${google_compute_instance.yugabyte_node.0.network_interface.0.access_config.0.nat_ip} -p 5433"
+  value     = "ysqlsh -U yugabyte -h ${vultr_server.yugabyte_node.0.main_ip} -p 5433"
 }
 
-output "YCQL"{
+output "YCQL" {
   sensitive = false
-  value     = "ycqlsh ${google_compute_instance.yugabyte_node.0.network_interface.0.access_config.0.nat_ip} 9042"
+  value     = "ycqlsh ${vultr_server.yugabyte_node.0.main_ip} 9042"
 }
 
-output "YEDIS"{
+output "YEDIS" {
   sensitive = false
-  value     = "redis-cli -h ${google_compute_instance.yugabyte_node.0.network_interface.0.access_config.0.nat_ip} -p 6379"
+  value     = "redis-cli -h ${vultr_server.yugabyte_node.0.main_ip} -p 6379"
 }

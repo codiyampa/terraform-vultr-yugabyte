@@ -41,7 +41,7 @@ variable "ssh_user" {
 }
 variable "node_type" {
   description = "Type of Node to be used for YugaByte DB node "
-  default     = "n1-standard-4"
+  default     = "4096 MB RAM,128 GB SSD,3.00 TB BW"
   type        = string
 }
 variable "yb_edition" {
@@ -63,8 +63,8 @@ variable "yb_version" {
 }
 
 variable "region_name" {
-  description = "Region name for GCP"
-  default     = "us-west1"
+  description = "Region name for Vultr"
+  default     = "Frankfurt"
   type        = string
 }
 variable "disk_size" {
