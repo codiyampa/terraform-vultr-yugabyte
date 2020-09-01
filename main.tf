@@ -6,10 +6,24 @@ data "vultr_os" "yugabyte_db_image" {
     }
 }
 
-data "vultr_region" "region" {
+data "vultr_region" "region_fra" {
     filter {
         name   = "name"
-        values = ["${var.region_name}"]
+        values = ["Frankfurt"]
+    }
+}
+
+data "vultr_region" "region_ams" {
+    filter {
+        name   = "name"
+        values = ["Amsterdam"]
+    }
+}
+
+data "vultr_region" "region_par" {
+    filter {
+        name   = "name"
+        values = ["Paris"]
     }
 }
 
@@ -18,11 +32,6 @@ data "vultr_plan" "node_type" {
         name   = "name"
         values = ["${var.node_type}"]
     }
-}
-
-resource "vultr_network" "vpc_network" {
-    description = "YugabyteDB private network."
-    region_id = data.vultr_region.region.id
 }
 
 resource "vultr_ssh_key" "ssh" {
@@ -34,14 +43,12 @@ resource "vultr_server" "yugabyte_node" {
     count = var.node_count
     label = "${var.prefix}${var.cluster_name}-n${format("%d", count.index + 1)}"
     plan_id = data.vultr_plan.node_type.id
-    region_id = data.vultr_region.region.id
+    region_id = "${count.index == 0 ? data.vultr_region.region_fra.id : count.index == 1 ? data.vultr_region.region_ams.id : data.vultr_region.region_par.id}"
     tag = "${var.prefix}${var.cluster_name}"
 
     os_id = data.vultr_os.yugabyte_db_image.id
 	
     ssh_key_ids = [vultr_ssh_key.ssh.id]
-	
-    network_ids = [vultr_network.vpc_network.id]
 
     provisioner "remote-exec" {
         inline = [
@@ -114,7 +121,6 @@ resource "vultr_server" "yugabyte_node" {
             "chmod +x /home/${var.ssh_user}/create_universe.sh",
             "chmod +x /home/${var.ssh_user}/start_tserver.sh",
             "chmod +x /home/${var.ssh_user}/start_master.sh",
-            "/home/${var.ssh_user}/configure_server.sh '${self.internal_ip}'",
             "/home/${var.ssh_user}/install_software.sh '${var.yb_version}'"
         ]
         connection {
@@ -129,7 +135,7 @@ resource "vultr_server" "yugabyte_node" {
 locals {
     depends_on = ["vultr_server.yugabyte_node"]
     ssh_ip_list = "${var.use_public_ip_for_ssh == "true" ? join(" ",vultr_server.yugabyte_node.*.main_ip) : join(" ",vultr_server.yugabyte_node.*.internal_ip)}"
-    config_ip_list = "${join(" ",vultr_server.yugabyte_node.*.internal_ip)}"
+    config_ip_list = "${join(" ",vultr_server.yugabyte_node.*.main_ip)}"
     zone = "${join(" ", vultr_server.yugabyte_node.*.location)}"
 }
 
@@ -140,6 +146,10 @@ resource "null_resource" "create_yugabyte_universe" {
   }
 
   depends_on = [vultr_server.yugabyte_node]
+
+  provisioner "local-exec" {
+      command = "${path.module}/utilities/scripts/configure_server.sh '${local.ssh_ip_list}' '${var.ssh_user}' ${var.ssh_private_key}"
+  }
 
   provisioner "local-exec" {
       command = "${path.module}/utilities/scripts/create_universe.sh 'Vultr' '${var.region_name}' ${var.replication_factor} '${local.config_ip_list}' '${local.ssh_ip_list}' '${local.zone}' '${var.ssh_user}' ${var.ssh_private_key}"

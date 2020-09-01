@@ -41,7 +41,7 @@ variable "ssh_user" {
 }
 variable "node_type" {
   description = "Type of Node to be used for YugaByte DB node "
-  default     = "4096 MB RAM,128 GB SSD,3.00 TB BW"
+  default     = "4096 MB RAM,80 GB SSD,3.00 TB BW"
   type        = string
 }
 variable "yb_edition" {
@@ -58,15 +58,16 @@ variable "yb_download_url" {
 
 variable "yb_version" {
   description = "The version number of YugaByteDB to install"
-  default     = "2.2.0.0"
+  default     = "2.2.2.0"
   type        = string
 }
 
 variable "region_name" {
   description = "Region name for Vultr"
-  default     = "Frankfurt"
+  default     = "europe"
   type        = string
 }
+
 variable "disk_size" {
   description = "Disk size for YugaByte DB nodes"
   default     = "50"
