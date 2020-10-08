@@ -1,35 +1,29 @@
-# terraform-gcp-yugabyte
-A Terraform module to deploy and run YugaByte on Google Cloud.
+# terraform-vultr-yugabyte
+A Terraform module to deploy and run YugaByte on Vultr.
 
 ## Config
 * First create a terraform file with provider details 
   ```
-  provider "google" 
+  provider "vultr" 
   { 
-    # Provide your GCP Creadentilals 
-    credentials = "${file("yugabyte-pcf-bc8114281026.json")}"
-
-    # The name of your GCP project 
-    project = "yugabyte-pcf"
+    # Provide your Vultr API Key 
+    api_key = "HSDKJFHUIJHEFKLHFSJKDFHHLSJKFHJKSDFL"
   }
   ```
-  Note :- You can get credentials file by following steps given [here](https://cloud.google.com/docs/authentication/getting-started)
+  Note :- You can get your api key here [here](https://my.vultr.com/settings/#settingsapi)
 
 * Now add the yugabyte terraform module to your file 
   ```
   module "yugabyte-db-cluster" {
-  source = "github.com/YugaByte/terraform-gcp-yugabyte.git"
+  source = "github.com/codiyampa/terraform-vultr-yugabyte.git?ref=multi-region"
 
   # The name of the cluster to be created.
   cluster_name = "test-yugabyte"
 
-   # key pair.
+  # key pair.
   ssh_private_key = "SSH_PRIVATE_KEY_HERE"
   ssh_public_key = "SSH_PUBLIC_KEY_HERE"
   ssh_user = "SSH_USER_NAME_HERE"
-
-  # The region name where the nodes should be spawned.
-  region_name = "YOUR VPC REGION"
 
   # Replication factor.
   replication_factor = "3"
@@ -64,7 +58,7 @@ $ terraform apply
 Once the cluster is created, you can go to the URL `http://<node ip or dns name>:7000` to view the UI. You can find the node's ip or dns by running the following:
 
 ```
-terraform state show google_compute_instance.yugabyte_node[0]
+terraform state show vultr_server.yugabyte_node[0]
 ```
 
 You can access the cluster UI by going to any of the following URLs.
